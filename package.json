@@ -1,0 +1,18 @@
+{
+  "name": "crm-graph-ql",
+  "version": "1.0.0",
+  "description": "Server graph Ql",
+  "main": "index.js",
+  "scripts": {
+    "start": "node .",
+    "dev": "nodemon"
+  },
+  "author": "Gustavo Rivero",
+  "license": "ISC",
+  "dependencies": {
+    "apollo-server": "^2.16.1"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.4"
+  }
+}
