@@ -5,6 +5,10 @@ const typeDefs = require('./db/schema');
 //Resolvers
 const resolvers = require('./db/resolvers');
 
+const conectarDb = require('./config/db');
+//Conectar con la BBDD
+conectarDb();
+
 //Servidor
 const server = new ApolloServer({
     typeDefs,
