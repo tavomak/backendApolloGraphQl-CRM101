@@ -1,5 +1,5 @@
-const mongoose = require('mongose');
-
+const mongoose = require('mongoose');
+// Esquema del USUARIO en la BBDD
 const UserSchema = mongoose.Schema({
     nombre: {
         type: String,
