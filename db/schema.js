@@ -10,6 +10,9 @@ const typeDefs = gql`
         email: String
         creado: String
     }
+    type Token {
+        token: String
+    }
 
     input UserInput {
         nombre: String!
@@ -17,21 +20,19 @@ const typeDefs = gql`
         email: String!
         password: String!
     }
+    
+    input AuthInput {
+        email: String!
+        password: String!
+    }
+
     type Query {
-        obtenerCurso: String
+        getUser(token: String!) : User
     }
     
     type Mutation {
         newUser(input: UserInput) : User
+        authUser(input: AuthInput) : Token
     }
 `;
-// Query: Se utiliza únicamente para hacer onsultas de lectura a la BBDD (R en CURD)
-// Para todo lo demás se utilizan Mutations (C,U,D de CURD) 
-
-//Tipos de DATOS en  GraphQl:
-// INT = Números enteros,
-// FLOAT = Números Decimales,
-// STRING = Cadena de Texto,
-// ID= Identificador único,
-// BOOLEAN= true o falrse
 module.exports = typeDefs;

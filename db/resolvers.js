@@ -2,21 +2,35 @@
 const User = require('../models/User')
 // Librería para hashear los password
 const bcrypt = require('bcryptjs');
+//Librería para Web Tokens
+const jwt = require('jsonwebtoken');
+//Firma del token, creada en las varialbes de entornos
+require('dotenv').config({path: 'variables.env'});
+
+//Creat Token
+
+const createToken = (user, secret, expiresIn) => {
+    //console.log(`Crear Token :`, user);
+
+    const { id, email, nombre, apellido } = user;
+
+    return jwt.sign( { id, email, nombre, apellido }, secret, { expiresIn } )
+}
 
 //Resolvers
 const resolvers = {
     Query: {
-        //x: Objeto que contiene los resultados retornados por el resolver padre. Permite que existan consultas anidadas en graphQl. Nunca se utiliza.
-        //input: Parametro que viene del TypeQuery en el schema dentro de la funcion obtenercursos.
-        //Contex: es un objeto que se comparte o esta disponible entre todos los resolvers se utiliza para autenticaciones y datos que sean necesarios en todos lados.
-        //Info: tiene informacion sobre la consulta actual. No se utiliza mucho.
-        obtenerCurso: (x, {input}, context, info ) => "Algo",
+        getUser: async (_, {token}) => {
+            const userId = await jwt.verify(token, process.env.SECRETA);
+            return userId;
+        }
     },
     Mutation: {
         newUser: async (_, {input}) => {
 
             //Destructuring de email y pasword
             const { email, password } = input;
+            console.log(`input del newUser:`, input);
 
             //Revisra si el usuario está registrado
             const UserExist = await User.findOne({email});
@@ -37,6 +51,28 @@ const resolvers = {
                 return user
             } catch (error) {
                 console.log(error);
+            }
+        },
+        authUser: async (_, {input}) => {
+            
+            const { email, password } = input;
+
+            //Si el usuario existe
+            const existeUsuario = await User.findOne({email});
+            if(!existeUsuario){
+                throw new Error('El usuario no está registrado')
+            }
+
+            // Si el password es correcto
+            const passwordCorrecto = await bcrypt.compare( password, existeUsuario.password );
+
+            if(!passwordCorrecto){
+                throw new Error(`Password Incorrecto`);
+            }
+
+            //Crear token
+            return {
+                token: createToken(existeUsuario, process.env.SECRETA, '24h' )
             }
         }
     }
