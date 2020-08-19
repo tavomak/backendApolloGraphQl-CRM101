@@ -1,5 +1,7 @@
-//Importar el modelo Usuarios, este va a tener todo los metodos de mongoose para insertar los registros
-const User = require('../models/User')
+//Importar el modelos, estos va a tener todo los metodos de mongoose para insertar los registros
+const User = require('../models/User'),
+Products = require('../models/Products');
+
 // Librería para hashear los password
 const bcrypt = require('bcryptjs');
 //Librería para Web Tokens
@@ -12,25 +14,43 @@ require('dotenv').config({path: 'variables.env'});
 const createToken = (user, secret, expiresIn) => {
     //console.log(`Crear Token :`, user);
 
-    const { id, email, nombre, apellido } = user;
+    const { id, email, name, lastName } = user;
 
-    return jwt.sign( { id, email, nombre, apellido }, secret, { expiresIn } )
+    return jwt.sign( { id, email, name, lastName }, secret, { expiresIn } )
 }
-
 //Resolvers
 const resolvers = {
     Query: {
         getUser: async (_, {token}) => {
             const userId = await jwt.verify(token, process.env.SECRETA);
             return userId;
-        }
+        },
+        getProducts: async () => {
+            try {
+                const products = await Products.find({})
+
+                return products;
+            } catch (error) {
+                console.log(error)
+            }
+        },
+        getProduct: async (_, {id}) => {
+            // Revisar si el producto existe
+            const product = await Products.findById(id);
+
+            if(!product) {
+                throw new Error('Producto No Encontrado');
+            }
+
+            return product;
+        },
     },
     Mutation: {
         newUser: async (_, {input}) => {
 
             //Destructuring de email y pasword
             const { email, password } = input;
-            console.log(`input del newUser:`, input);
+            //console.log(`input del newUser:`, input);
 
             //Revisra si el usuario está registrado
             const UserExist = await User.findOne({email});
@@ -54,7 +74,7 @@ const resolvers = {
             }
         },
         authUser: async (_, {input}) => {
-            
+
             const { email, password } = input;
 
             //Si el usuario existe
@@ -74,7 +94,58 @@ const resolvers = {
             return {
                 token: createToken(existeUsuario, process.env.SECRETA, '24h' )
             }
+        },
+        newProduct: async (_, {input}) => {
+
+            try {
+                const newProduct = new Products(input);
+
+                //Almacenar en la BBDD
+                const saveProduct = await newProduct.save();
+
+                return saveProduct;
+                
+            } catch (error) {
+                console.log(error)
+            }
+
+        },
+        updateProduct: async (_, {id, input}) => {
+            /// Revisar si el producto existe
+            let product = await Products.findById(id);
+
+            if(!product) {
+                throw new Error('Producto No Encontrado');
+            }
+
+            //Guardarlo en BBDD
+            product = await Products.findByIdAndUpdate({_id : id}, input, {new: true});
+
+            return product;
+        },
+        removeProduct: async(_, {id}) => {
+            /// Revisar si el producto existe
+            let product = await Products.findById(id);
+
+            if(!product) {
+                throw new Error('Producto No Encontrado');
+            }
+
+            //Guardarlo en BBDD
+            product = await Products.findByIdAndDelete({_id : id});
+
+            return "Producto Eliminado";
         }
     }
 }
+
+/* const checkProduct = async (id) => {
+    // Revisar si el producto existe
+    const product = await Products.findById(id);
+
+    if(!product) {
+        throw new Error('Producto No Encontrado');
+    }
+} */
+
 module.exports = resolvers;
