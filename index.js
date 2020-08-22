@@ -4,6 +4,10 @@ const { ApolloServer } = require('apollo-server');
 const typeDefs = require('./db/schema');
 //Resolvers
 const resolvers = require('./db/resolvers');
+//Librería para Web Tokens
+const jwt = require('jsonwebtoken');
+//Firma del token, creada en las varialbes de entornos
+require('dotenv').config({path: 'variables.env'});
 
 const conectarDb = require('./config/db');
 //Conectar con la BBDD
@@ -13,9 +17,20 @@ conectarDb();
 const server = new ApolloServer({
     typeDefs,
     resolvers,
-    context: () => {
-        const miContext = "Hola";
-        return {miContext};
+    context: ({req}) => {
+        const token = req.headers['authorization'] || '';
+        //console.log(token);
+        if (token) {
+            try {
+                const user = jwt.verify(token, process.env.SECRETA);
+                //console.log(user);
+                return{
+                    user
+                }
+            } catch (error) {
+                console.log('Error', error)
+            }
+        }
     }
 });
 
@@ -23,14 +38,3 @@ const server = new ApolloServer({
 server.listen().then( ({url}) => {
     console.log(`Servidor listo en la URL: ${url}`)
 });
-
-/* GraphQL
-Queries: Se utiliza para leer los registros, es la forma de extraer la informacion exsistente en una BBDD o Rest API. Equivale a la R de CURD.
-
-Mutation: Se utiliza para las otras 3 acciones del CURD; Crear, Actualizar y Borrar registros.
-
-Schema: Describe los tipos de objetos, queries y datos en la aplicacion. Define mediante un Typing si un campo es de tipo string, int, bool, etc. Requiere como minimo un Type Query y un resolver que satisfaga la funcion que esta dentro del query.
-
-Resolvers: Son funciones que retornan los valores que se definieron en el schema. Se encarga de consultar la BBDD y traer el resultado que se mostrar'a en el schema. Siempre son un objeto
-
-*/

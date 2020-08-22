@@ -23,6 +23,16 @@ const typeDefs = gql`
         created: String
     }
 
+    type Client {
+        id: ID
+        name: String
+        lastName: String
+        company: String
+        email: String
+        phone: String
+        vendor: ID
+    }
+
     # INPUTS =====================
 
     input UserInput {
@@ -43,6 +53,14 @@ const typeDefs = gql`
         stock: Int!
     }
 
+    input ClientInput{
+        name: String!
+        lastName: String!
+        company: String!
+        email: String!
+        phone: String
+    }
+
     # Queries ======================
 
     type Query {
@@ -52,6 +70,11 @@ const typeDefs = gql`
         #Productos
         getProducts: [Product]
         getProduct(id: ID!) : Product
+
+        #Clientes
+        getClient(id: ID!): Client
+        getClients: [Client]
+        getClientsVendor: [Client]
     }
     
     # Mutations =====================
@@ -65,6 +88,11 @@ const typeDefs = gql`
         newProduct(input: ProductInput) : Product
         updateProduct(id: ID!, input: ProductInput) : Product
         removeProduct(id: ID!) : String
+
+        #Clientes
+        newClient(input: ClientInput) : Client
+        updateClient(id: ID!, input: ClientInput) : Client
+        removeClient(id: ID!) : String
     }
 `;
 module.exports = typeDefs;
