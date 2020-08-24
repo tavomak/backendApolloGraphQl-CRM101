@@ -33,6 +33,29 @@ const typeDefs = gql`
         vendor: ID
     }
 
+    type Order {
+        id: ID
+        order: [OrderGroup]
+        price: Float
+        client: ID
+        vendor: ID
+        created: String
+        state: OrderState
+    }
+
+    type OrderGroup{
+        id: ID
+        amount: Int
+    }
+
+    type TopClients{
+        total: Float
+        client: [Client]
+    }
+    type TopVendors{
+        total: Float
+        vendor: [User]
+    }
     # INPUTS =====================
 
     input UserInput {
@@ -61,6 +84,24 @@ const typeDefs = gql`
         phone: String
     }
 
+    input ProductOrderInput{
+        id: ID
+        amount: Int
+    }
+
+    input OrderInput{
+        order: [ProductOrderInput]
+        price: Float
+        client: ID
+        state: OrderState
+    }
+
+    enum OrderState {
+        PENDIENTE
+        COMPLETADO
+        CANCELADO
+    }
+
     # Queries ======================
 
     type Query {
@@ -75,6 +116,17 @@ const typeDefs = gql`
         getClient(id: ID!): Client
         getClients: [Client]
         getClientsVendor: [Client]
+
+        #Pedidos
+        getOrders: [Order]
+        getOrdersVendor: [Order]
+        getOrderById(id: ID!) : Order
+        getOrdersByState(state: String!) : [Order]
+
+        #Search
+        bestClients: [TopClients]
+        bestVendors: [TopVendors]
+        searchProduct(text: String!) : [Product]
     }
     
     # Mutations =====================
@@ -93,6 +145,11 @@ const typeDefs = gql`
         newClient(input: ClientInput) : Client
         updateClient(id: ID!, input: ClientInput) : Client
         removeClient(id: ID!) : String
+
+        #Pedidos
+        newOrder(input: OrderInput) : Order
+        updateOrder(id: ID!, input: OrderInput) : Order
+        removeOrder(id: ID!) : String
     }
 `;
 module.exports = typeDefs;
