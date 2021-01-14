@@ -259,18 +259,12 @@ const resolvers = {
         },
         updateProduct: async (_, { id, input }) => {
             // Revisar si el producto existe
-            const product = await Products.findById(id);
-
+            let product = await Products.findById(id);
             if (!product) {
                 throw new Error('Producto No Encontrado');
             }
-
             //Guardarlo en BBDD
-            product = await Products.findByIdAndUpdate({
-                _id: id
-            }, input, {
-                new: true
-            });
+            product = await Products.findOneAndUpdate({ _id : id }, input, { new: true } );
 
             return product;
         },
