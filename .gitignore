@@ -20,7 +20,7 @@ junit.xml
 
 # Node modules
 node_modules/
-
+variables.env
 # Mac OS
 .DS_Store
 
